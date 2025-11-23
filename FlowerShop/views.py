@@ -25,4 +25,4 @@ def register(request):
             return redirect('order_list')  # Перенаправляем на страницу заказов
     else:
         form = RegistrationForm()
-    reчturn render(request, 'registration/register.html', {'form': form})
+    return render(request, 'registration/register.html', {'form': form})
