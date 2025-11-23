@@ -1,0 +1,114 @@
+<!-- Flower_Shop/order_list.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список заказов</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .search-form {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+   <!-- Статус пользователя -->
+    <div class="user-status">
+        {% if user.is_authenticated %}
+            <p>Привет, {{ user.email }}!
+                <form method="post" action="{% url 'logout' %}" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit">Выйти</button>
+                </form>
+            </p>
+        {% else %}
+            <p>Вы не вошли. <a href="{% url 'login' %}">Войти</a></p>
+        {% endif %}
+    </div>
+
+    <h1>Список заказов</h1>
+
+    <!-- Форма поиска -->
+    <form action="{% url 'order_list' %}" method="GET" class="search-form">
+        <input name="q" type="text" placeholder="Введите имя покупателя..." value="{{ request.GET.q }}">
+        <button type="submit">Найти</button>
+        {% if request.GET.q %}
+            <a href="{% url 'order_list' %}">Сбросить</a>
+        {% endif %}
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Покупатель</th>
+                <th>Электронная почта</th>
+                <th>Телефон</th>
+                <th>Адрес</th>
+                <th>Заказы</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+            <tr>
+                <td>{{ customer.name }}</td>
+                <td>{{ customer.email }}</td>
+                <td>{{ customer.phone }}</td>
+                <td>{{ customer.address }}</td>
+                <td>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Номер заказа</th>
+                                <th>Дата создания</th>
+                                <th>Статус</th>
+                                <th>Состав заказа</th>
+                                <th>Общая стоимость</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in customer.orders.all %}
+                            <tr>
+                                <td>{{ order.id }}</td>
+                                <td>{{ order.created_at }}</td>
+                                <td>{{ order.get_status_display }}</td>
+                                <td>
+                                    <ul>
+                                        {% for item in order.items.all %}
+                                        <li>{{ item.flower_name }} — {{ item.quantity }} шт., цена: {{ item.price }} руб.</li>
+                                        {% endfor %}
+                                    </ul>
+                                </td>
+                                <td>{{ order.total_price }} руб.</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5">Заказы отсутствуют</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">Покупатели не найдены</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
